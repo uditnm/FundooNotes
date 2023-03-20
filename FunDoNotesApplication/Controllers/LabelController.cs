@@ -95,5 +95,30 @@ namespace FunDoNotesApplication.Controllers
             }
         }
 
+        [Authorize]
+        [HttpDelete("{LabelId}")]
+
+        public ActionResult Delete(int LabelId)
+        {
+            try
+            {
+                var UserId = Convert.ToInt64(User.FindFirst("UserId").Value);
+                var NoteDeleted = manager.DeleteLabel(LabelId, UserId);
+                if (NoteDeleted)
+                {
+                    return Ok(new ResponseModel<bool> { Status = true, Message = "Label deleted Successfully", Data = NoteDeleted });
+                }
+                else
+                {
+                    return BadRequest(new ResponseModel<bool> { Status = true, Message = "Deletion Unsuccessful" });
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
     }
 }

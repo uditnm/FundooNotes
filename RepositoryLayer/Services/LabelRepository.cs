@@ -94,5 +94,28 @@ namespace RepositoryLayer.Services
                 throw;
             }
         }
+
+        public bool DeleteLabel(int LabelId, long UserId)
+        {
+            try
+            {
+                var checkUser = context.Labels.FirstOrDefault(x=>x.LabelId == LabelId && x.UserId == UserId);
+                if (checkUser != null)
+                {
+                    context.Labels.Remove(checkUser);
+                    context.SaveChanges();
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

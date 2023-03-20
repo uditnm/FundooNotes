@@ -11,5 +11,6 @@ namespace ManagerLayer.Interfaces
         public LabelEntity CreateLabel(LabelModel model, long UserId);
         public List<LabelEntity> GetLabels(long UserId);
         public List<LabelEntity> GetLabelsByNote(long NoteId, long UserId);
+        public bool DeleteLabel(int LabelId, long UserId);
     }
 }

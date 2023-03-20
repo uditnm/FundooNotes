@@ -28,5 +28,10 @@ namespace ManagerLayer.Services
         {
             return repository.GetLabelsByNote(NoteId, UserId);
         }
+
+        public bool DeleteLabel(int LabelId, long UserId)
+        {
+            return repository.DeleteLabel(LabelId, UserId);
+        }
     }
 }
