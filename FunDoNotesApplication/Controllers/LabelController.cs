@@ -60,7 +60,32 @@ namespace FunDoNotesApplication.Controllers
                 }
                 else
                 {
-                    return BadRequest(new ResponseModel<List<LabelEntity>> { Status = false, Message = "Labels Display Unsuccessful" });
+                    return BadRequest(new ResponseModel<List<LabelEntity>> { Status = false, Message = "No Labels Found" });
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        [Authorize]
+        [HttpGet("{NoteId}")]
+
+        public ActionResult ViewLabelsByNote(long NoteId)
+        {
+            try
+            {
+                var UserId = Convert.ToInt64(User.FindFirst("UserId").Value);
+                var Labels = manager.GetLabelsByNote(NoteId, UserId);
+                if (Labels != null)
+                {
+                    return Ok(new ResponseModel<List<LabelEntity>> { Status = true, Message = "Labels Displayed Successfully", Data = Labels });
+                }
+                else
+                {
+                    return BadRequest(new ResponseModel<List<LabelEntity>> { Status = false, Message = "No Labels Found" });
                 }
             }
             catch (Exception)

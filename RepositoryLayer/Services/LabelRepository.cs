@@ -72,5 +72,27 @@ namespace RepositoryLayer.Services
                 throw;
             }
         }
+
+        public List<LabelEntity> GetLabelsByNote(long NoteId, long UserId)
+        {
+            try
+            {
+                var checkUser = context.Labels.FirstOrDefault(x => x.UserId == UserId && x.NoteId == NoteId);
+                if (checkUser != null)
+                {
+                    var labels = context.Labels.Where(x=>x.NoteId== NoteId).ToList();
+                    return labels;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

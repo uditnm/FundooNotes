@@ -24,5 +24,9 @@ namespace ManagerLayer.Services
         {
             return repository.GetLabels(UserId);
         }
+        public List<LabelEntity> GetLabelsByNote(long NoteId, long UserId)
+        {
+            return repository.GetLabelsByNote(NoteId, UserId);
+        }
     }
 }
