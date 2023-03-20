@@ -120,5 +120,30 @@ namespace FunDoNotesApplication.Controllers
             }
         }
 
+        [Authorize]
+        [HttpPut("{LabelId}")]
+
+        public ActionResult EditLabel(int LabelId, string LabelName)
+        {
+            try
+            {
+                var UserId = Convert.ToInt64(User.FindFirst("UserId").Value);
+                var NewLabel = manager.EditLabel(LabelId, UserId, LabelName);
+                if (NewLabel != null)
+                {
+                    return Ok(new ResponseModel<LabelEntity> { Status = true,Message = "Label Update Successful", Data = NewLabel});
+                }
+                else
+                {
+                    return BadRequest(new ResponseModel<LabelEntity> { Status = false, Message = "Label Update Unsuccessful"});
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
     }
 }

@@ -33,5 +33,9 @@ namespace ManagerLayer.Services
         {
             return repository.DeleteLabel(LabelId, UserId);
         }
+        public LabelEntity EditLabel(int LabelId, long UserId, string LabelName)
+        {
+            return repository.EditLabel(LabelId, UserId, LabelName);
+        }
     }
 }

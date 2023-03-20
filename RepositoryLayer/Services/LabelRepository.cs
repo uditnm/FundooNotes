@@ -5,11 +5,10 @@ using RepositoryLayer.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace RepositoryLayer.Services
 {
-    public class LabelRepository: ILabelRepository
+    public class LabelRepository : ILabelRepository
     {
         private readonly FundoAppContext context;
         public LabelRepository(FundoAppContext context)
@@ -26,11 +25,11 @@ namespace RepositoryLayer.Services
                 {
                     LabelEntity label = new LabelEntity();
                     label.LabelName = model.LabelName;
-                    label.NoteId= model.NoteId;
+                    label.NoteId = model.NoteId;
                     label.UserId = UserId;
                     var check = context.Labels.Add(label);
                     context.SaveChanges();
-                    if(check!= null)
+                    if (check != null)
                     {
                         return label;
                     }
@@ -58,7 +57,7 @@ namespace RepositoryLayer.Services
                 var checkUser = context.Labels.FirstOrDefault(x => x.UserId == UserId);
                 if (checkUser != null)
                 {
-                    var labels = context.Labels.Where(x=>x.UserId == UserId).ToList();
+                    var labels = context.Labels.Where(x => x.UserId == UserId).ToList();
                     return labels;
                 }
                 else
@@ -80,7 +79,7 @@ namespace RepositoryLayer.Services
                 var checkUser = context.Labels.FirstOrDefault(x => x.UserId == UserId && x.NoteId == NoteId);
                 if (checkUser != null)
                 {
-                    var labels = context.Labels.Where(x=>x.NoteId== NoteId).ToList();
+                    var labels = context.Labels.Where(x => x.NoteId == NoteId).ToList();
                     return labels;
                 }
                 else
@@ -99,7 +98,7 @@ namespace RepositoryLayer.Services
         {
             try
             {
-                var checkUser = context.Labels.FirstOrDefault(x=>x.LabelId == LabelId && x.UserId == UserId);
+                var checkUser = context.Labels.FirstOrDefault(x => x.LabelId == LabelId && x.UserId == UserId);
                 if (checkUser != null)
                 {
                     context.Labels.Remove(checkUser);
@@ -109,6 +108,29 @@ namespace RepositoryLayer.Services
                 else
                 {
                     return false;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public LabelEntity EditLabel(int LabelId, long UserId, string LabelName)
+        {
+            try
+            {
+                var Label = context.Labels.FirstOrDefault(x => x.LabelId == LabelId && x.UserId == UserId);
+                if(Label!= null)
+                {
+                    Label.LabelName = LabelName;
+                    context.SaveChanges();
+                    return Label;
+                }
+                else
+                {
+                    return null;
                 }
             }
             catch (Exception)
