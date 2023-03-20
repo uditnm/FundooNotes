@@ -44,7 +44,7 @@ namespace RepositoryLayer.Services
                 notes.Description = model.Description;
                 notes.Reminder = model.Reminder;
                 notes.BackgroundColor = "white";
-                notes.Image = model.Image;
+                notes.Image = null;
                 notes.Pin = false;
                 notes.Created = DateTime.Now;
                 notes.Edited = DateTime.Now;
