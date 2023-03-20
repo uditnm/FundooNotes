@@ -20,5 +20,9 @@ namespace ManagerLayer.Services
         {
             return repository.CreateLabel(model, UserId);
         }
+        public List<LabelEntity> GetLabels(long UserId)
+        {
+            return repository.GetLabels(UserId);
+        }
     }
 }

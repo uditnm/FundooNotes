@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryLayer.Entity;
 using System;
+using System.Collections.Generic;
 
 namespace FunDoNotesApplication.Controllers
 {
@@ -38,6 +39,31 @@ namespace FunDoNotesApplication.Controllers
                 }
             }
             catch (System.Exception)
+            {
+
+                throw;
+            }
+        }
+
+        [Authorize]
+        [HttpGet]
+
+        public ActionResult ViewAllLabels()
+        {
+            try
+            {
+                var UserId = Convert.ToInt64(User.FindFirst("UserId").Value);
+                var AllLabels = manager.GetLabels(UserId);
+                if (AllLabels != null)
+                {
+                    return Ok(new ResponseModel<List<LabelEntity>> { Status=true, Message ="Labels Displayed Successfully",Data = AllLabels});
+                }
+                else
+                {
+                    return BadRequest(new ResponseModel<List<LabelEntity>> { Status = false, Message = "Labels Display Unsuccessful" });
+                }
+            }
+            catch (Exception)
             {
 
                 throw;

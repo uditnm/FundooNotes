@@ -50,5 +50,27 @@ namespace RepositoryLayer.Services
                 throw;
             }
         }
+
+        public List<LabelEntity> GetLabels(long UserId)
+        {
+            try
+            {
+                var checkUser = context.Labels.FirstOrDefault(x => x.UserId == UserId);
+                if (checkUser != null)
+                {
+                    var labels = context.Labels.Where(x=>x.UserId == UserId).ToList();
+                    return labels;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

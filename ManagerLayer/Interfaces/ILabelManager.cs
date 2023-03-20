@@ -9,5 +9,6 @@ namespace ManagerLayer.Interfaces
     public interface ILabelManager
     {
         public LabelEntity CreateLabel(LabelModel model, long UserId);
+        public List<LabelEntity> GetLabels(long UserId);
     }
 }
