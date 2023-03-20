@@ -53,9 +53,17 @@ namespace RepositoryLayer.Services
 
         public string EncryptPassword(string password)
         {
-            var PlainPassword = Encoding.UTF8.GetBytes(password);
-            var encodedPassword = Convert.ToBase64String(PlainPassword);
-            return encodedPassword;
+            try
+            {
+                var PlainPassword = Encoding.UTF8.GetBytes(password);
+                var encodedPassword = Convert.ToBase64String(PlainPassword);
+                return encodedPassword;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
         public string Login( LoginModel model)
@@ -84,21 +92,29 @@ namespace RepositoryLayer.Services
 
         private string GenerateToken(string email,long id)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var claims = new[]
+            try
             {
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+                var claims = new[]
+                {
                 new Claim(ClaimTypes.Email, email),
                 new Claim("UserId",id.ToString())
             };
 
-            var token = new JwtSecurityToken(_config["Jwt:Issuer"],
-              _config["Jwt:Audience"],
-              claims,
-              expires: DateTime.Now.AddMinutes(15),
-              signingCredentials: credentials);
+                var token = new JwtSecurityToken(_config["Jwt:Issuer"],
+                  _config["Jwt:Audience"],
+                  claims,
+                  expires: DateTime.Now.AddMinutes(15),
+                  signingCredentials: credentials);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+                return new JwtSecurityTokenHandler().WriteToken(token);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
 
