@@ -1,15 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CommonLayer.Models;
 using ManagerLayer.Interfaces;
-using CommonLayer.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RepositoryLayer.Entity;
 using System;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
-using Microsoft.AspNetCore.Authorization;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace FunDoNotesApplication.Controllers
@@ -19,14 +13,10 @@ namespace FunDoNotesApplication.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserManager manager;
-        private readonly INotesManager notesManager;
-        
 
-        public UserController(IUserManager manager, INotesManager notesManager)
+        public UserController(IUserManager manager)
         {
             this.manager = manager;
-            this.notesManager = notesManager;
-            
         }
 
         [HttpPost("Register")]
@@ -45,12 +35,12 @@ namespace FunDoNotesApplication.Controllers
                     return BadRequest(new ResponseModel<UserEntity> { Status = false, Message = "Register Unsuccessful", Data = checkReg });
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 return null;
             }
-            
+
         }
 
 
@@ -70,12 +60,12 @@ namespace FunDoNotesApplication.Controllers
                     return BadRequest(new ResponseModel<string> { Status = false, Message = "Login unsuccessful", Data = checkLogin });
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 return null;
             }
-            
+
         }
 
 
@@ -85,7 +75,7 @@ namespace FunDoNotesApplication.Controllers
             try
             {
                 var checkEmail = manager.ForgetPassword(email);
-                if(checkEmail != null)
+                if (checkEmail != null)
                 {
                     return Ok(new ResponseModel<string> { Status = true, Message = "Reset Link sent to mail successfully" });
                 }
@@ -108,14 +98,14 @@ namespace FunDoNotesApplication.Controllers
             try
             {
                 var email = User.FindFirst(ClaimTypes.Email).Value.ToString();
-                var user = manager.ResetPassword(model,email);
-                if(user)
+                var user = manager.ResetPassword(model, email);
+                if (user)
                 {
-                    return Ok(new ResponseModel<UserEntity> { Status = true, Message = "Reset Successfull"});
+                    return Ok(new ResponseModel<UserEntity> { Status = true, Message = "Reset Successfull" });
                 }
                 else
                 {
-                    return BadRequest(new ResponseModel<UserEntity> { Status = false, Message = "Reset Unsuccessfull"});
+                    return BadRequest(new ResponseModel<UserEntity> { Status = false, Message = "Reset Unsuccessfull" });
                 }
             }
             catch (Exception)
@@ -125,7 +115,7 @@ namespace FunDoNotesApplication.Controllers
             }
         }
 
-        
+
 
     }
 }
