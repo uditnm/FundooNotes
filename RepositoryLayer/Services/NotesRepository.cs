@@ -14,6 +14,7 @@ using System.Configuration;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using CloudinaryDotNet.Actions;
+using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace RepositoryLayer.Services
 {
@@ -309,6 +310,54 @@ namespace RepositoryLayer.Services
                     return null;
                 }
 
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public Tuple<int,List<NotesEntity>> FindNotesByKeyword(string keyword, int UserId)
+        {
+            try
+            {
+                var MatchedNotes = context.Notes.Where(x=>(x.Description.Contains(keyword)||x.Title.Contains(keyword)) && x.UserId==UserId).ToList();
+                var NoteCount = MatchedNotes.Count;
+                Tuple<int,List<NotesEntity>> matched = new Tuple<int, List<NotesEntity>>(NoteCount, MatchedNotes);
+                if (NoteCount > 0)
+                {
+
+                    return matched;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public Tuple<int, List<NotesEntity>> FindNotesPageSize(string Keyword, int PageNumber, int PageSize, int UserId)
+        {
+            try
+            {
+                var MatchedNotes = context.Notes.Where(x => (x.Description.Contains(Keyword) || x.Title.Contains(Keyword)) && x.UserId == UserId).Skip((PageNumber - 1)*(PageSize)).Take(PageSize).ToList();
+                var NoteCount = MatchedNotes.Count;
+                Tuple<int, List<NotesEntity>> matched = new Tuple<int, List<NotesEntity>>(NoteCount, MatchedNotes);
+                if (NoteCount > 0)
+                {
+
+                    return matched;
+                }
+                else
+                {
+                    return null;
+                }
             }
             catch (Exception)
             {

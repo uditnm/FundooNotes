@@ -1,11 +1,9 @@
 ﻿using CommonLayer.Models;
 using ManagerLayer.Interfaces;
-using ManagerLayer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryLayer.Entity;
-using RepositoryLayer.Migrations;
 using System;
 using System.Collections.Generic;
 
@@ -13,7 +11,7 @@ namespace FunDoNotesApplication.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class NotesController: ControllerBase
+    public class NotesController : ControllerBase
     {
         private readonly INotesManager manager;
 
@@ -24,7 +22,7 @@ namespace FunDoNotesApplication.Controllers
         }
 
         [Authorize]
-        [HttpPost("AddNote")]
+        [HttpPost]
         public ActionResult AddNote(NotesCreationModel model)
         {
             try
@@ -150,10 +148,10 @@ namespace FunDoNotesApplication.Controllers
             try
             {
                 var UserId = Convert.ToInt32(User.FindFirst("UserId").Value);
-                var note = manager.NoteColor(model, NotesId,UserId);
+                var note = manager.NoteColor(model, NotesId, UserId);
                 if (note != null)
                 {
-                    return Ok(new ResponseModel<NotesEntity> { Status = true, Message = "Color Change Successful", Data =note });
+                    return Ok(new ResponseModel<NotesEntity> { Status = true, Message = "Color Change Successful", Data = note });
                 }
                 else
                 {
@@ -174,7 +172,7 @@ namespace FunDoNotesApplication.Controllers
             try
             {
                 var UserId = Convert.ToInt32(User.FindFirst("UserId").Value);
-                var note = manager.UploadImage(UserId,NotesId, file);
+                var note = manager.UploadImage(UserId, NotesId, file);
                 if (note != null)
                 {
                     return Ok(new ResponseModel<NotesEntity> { Status = true, Message = "Color Change Successful", Data = note });
@@ -208,7 +206,7 @@ namespace FunDoNotesApplication.Controllers
                 {
                     return BadRequest(new ResponseModel<List<NotesEntity>> { Status = false, Message = "Notes display Unsuccessfull", Data = notes });
                 }
-            
+
             }
             catch (Exception)
             {
@@ -243,20 +241,68 @@ namespace FunDoNotesApplication.Controllers
         }
 
         [Authorize]
-        [HttpDelete("{NotesId}")] 
+        [HttpDelete("{NotesId}")]
         public ActionResult DeleteNote(int NotesId)
         {
             var UserId = Convert.ToInt32(User.FindFirst("UserId").Value);
             var delNote = manager.DeleteNote(UserId, NotesId);
             if (delNote)
             {
-                return Ok(new ResponseModel<bool> { Status = true, Message = "Delete Successfull"});
+                return Ok(new ResponseModel<bool> { Status = true, Message = "Delete Successfull" });
             }
             else
             {
                 return BadRequest(new ResponseModel<bool> { Status = false, Message = "Delete Unsuccessfull" });
             }
-        
+
+        }
+
+        [Authorize]
+        [HttpGet("FindNote/{keyword}")]
+        public ActionResult FindNotes(string keyword)
+        {
+            try
+            {
+                var UserId = Convert.ToInt32(User.FindFirst("UserId").Value);
+                var notes = manager.FindNotesByKeyword(keyword, UserId);
+                if (notes != null)
+                {
+                    return Ok(new ResponseModel<Tuple<int, List<NotesEntity>>> { Status = true, Message = "Found Matching Notes", Data = notes });
+                }
+                else
+                {
+                    return BadRequest(new ResponseModel<Tuple<int, List<NotesEntity>>> { Status = false, Message = "Notes not found" });
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        [Authorize]
+        [HttpGet("FindNote/{Keyword}/{PageSize}/{PageNo}")]
+        public ActionResult FindNotesPageSize(string Keyword, int PageSize, int PageNo)
+        {
+            try
+            {
+                var UserId = Convert.ToInt32(User.FindFirst("UserId").Value);
+                var notes = manager.FindNotesPageSize(Keyword, PageNo, PageSize, UserId);
+                if (notes != null)
+                {
+                    return Ok(new ResponseModel<Tuple<int, List<NotesEntity>>> { Status = true, Message = "Found Matching Notes", Data = notes });
+                }
+                else
+                {
+                    return BadRequest(new ResponseModel<Tuple<int, List<NotesEntity>>> { Status = false, Message = "Notes not found" });
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

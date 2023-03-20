@@ -19,5 +19,7 @@ namespace ManagerLayer.Interfaces
         public NotesEntity TrashNote(int NotesId, int UserId);
         public NotesEntity NoteColor(NotesColorModel model, int NotesId, int UserId);
         public NotesEntity UploadImage(int UserId, int NotesId, IFormFile file);
+        public Tuple<int, List<NotesEntity>> FindNotesByKeyword(string keyword, int UserId);
+        public Tuple<int, List<NotesEntity>> FindNotesPageSize(string Keyword, int PageNumber, int PageSize, int UserId);
     }
 }   

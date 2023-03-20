@@ -67,5 +67,14 @@ namespace ManagerLayer.Services
         {
             return repository.UploadImage(UserId, NotesId, file);
         }
+
+        public Tuple<int, List<NotesEntity>> FindNotesByKeyword(string keyword, int UserId)
+        {
+            return repository.FindNotesByKeyword(keyword, UserId);
+        }
+        public Tuple<int, List<NotesEntity>> FindNotesPageSize(string Keyword, int PageNumber, int PageSize, int UserId)
+        {
+            return repository.FindNotesPageSize(Keyword, PageNumber, PageSize, UserId);
+        }
     }
 }
