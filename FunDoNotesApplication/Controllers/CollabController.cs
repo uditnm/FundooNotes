@@ -76,7 +76,7 @@ namespace FunDoNotesApplication.Controllers
             {
                 var UserId = Convert.ToInt64(User.FindFirst("UserId").Value);
                 var collab = manager.DeleteCollaborator(UserId,CollabId);
-                if (collab != null)
+                if (collab)
                 {
                     return Ok(new ResponseModel<CollaboratorEntity> { Status = true, Message = "Collaborator deleted successfully" });
                 }
