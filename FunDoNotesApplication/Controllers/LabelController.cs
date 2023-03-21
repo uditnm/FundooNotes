@@ -62,21 +62,21 @@ namespace FunDoNotesApplication.Controllers
                 var cacheKey = "labelsList";
                 string serializedLabelsList;
                 var AllLabels = new List<LabelEntity>();
-                var redisNotesList = await distributedCache.GetAsync(cacheKey);
-                if (redisNotesList != null)
+                var redisLabelsList = await distributedCache.GetAsync(cacheKey);
+                if (redisLabelsList != null)
                 {
-                    serializedLabelsList = Encoding.UTF8.GetString(redisNotesList);
+                    serializedLabelsList = Encoding.UTF8.GetString(redisLabelsList);
                     AllLabels = JsonConvert.DeserializeObject<List<LabelEntity>>(serializedLabelsList);
                 }
                 else
                 {
                     AllLabels = manager.GetLabels(UserId);
                     serializedLabelsList = JsonConvert.SerializeObject(AllLabels);
-                    redisNotesList = Encoding.UTF8.GetBytes(serializedLabelsList);
+                    redisLabelsList = Encoding.UTF8.GetBytes(serializedLabelsList);
                     var options = new DistributedCacheEntryOptions()
                         .SetAbsoluteExpiration(DateTime.Now.AddMinutes(10))
                         .SetSlidingExpiration(TimeSpan.FromMinutes(2));
-                    await distributedCache.SetAsync(cacheKey, redisNotesList, options);
+                    await distributedCache.SetAsync(cacheKey, redisLabelsList, options);
                 }
                 if (AllLabels != null)
                 {
