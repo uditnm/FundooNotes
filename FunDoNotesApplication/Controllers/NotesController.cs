@@ -3,9 +3,16 @@ using ManagerLayer.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Newtonsoft.Json;
 using RepositoryLayer.Entity;
+using RepositoryLayer.FundoContext;
+using RepositoryLayer.Migrations;
 using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace FunDoNotesApplication.Controllers
 {
@@ -14,11 +21,15 @@ namespace FunDoNotesApplication.Controllers
     public class NotesController : ControllerBase
     {
         private readonly INotesManager manager;
+        private readonly IDistributedCache distributedCache;
+        private readonly FundoAppContext context;
 
 
-        public NotesController(INotesManager manager)
+        public NotesController(INotesManager manager, IDistributedCache distributedCache, FundoAppContext context)
         {
             this.manager = manager;
+            this.distributedCache = distributedCache;
+            this.context = context;
         }
 
         [Authorize]
@@ -192,12 +203,31 @@ namespace FunDoNotesApplication.Controllers
 
         [Authorize]
         [HttpGet]
-        public ActionResult DisplayNotes()
+        public async Task<IActionResult> GetAllNotes()
         {
             try
             {
                 var UserId = Convert.ToInt32(User.FindFirst("UserId").Value);
-                var notes = manager.GetAllNotes(UserId);
+                var cacheKey = "notesList";
+                string serializedNotesList;
+                var notes = new List<NotesEntity>();
+                var redisNotesList = await distributedCache.GetAsync(cacheKey);
+                if (redisNotesList != null)
+                {
+                    serializedNotesList = Encoding.UTF8.GetString(redisNotesList);
+                    notes = JsonConvert.DeserializeObject<List<NotesEntity>>(serializedNotesList);
+                }
+                else
+                {
+                    notes = manager.GetAllNotes(UserId);
+                    serializedNotesList = JsonConvert.SerializeObject(notes);
+                    redisNotesList = Encoding.UTF8.GetBytes(serializedNotesList);
+                    var options = new DistributedCacheEntryOptions()
+                        .SetAbsoluteExpiration(DateTime.Now.AddMinutes(10))
+                        .SetSlidingExpiration(TimeSpan.FromMinutes(2));
+                    await distributedCache.SetAsync(cacheKey, redisNotesList, options);
+                }
+
                 if (notes != null)
                 {
                     return Ok(new ResponseModel<List<NotesEntity>> { Status = true, Message = "Notes display Successfull", Data = notes });
