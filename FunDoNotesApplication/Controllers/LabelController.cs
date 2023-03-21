@@ -2,9 +2,13 @@
 using ManagerLayer.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
+using Newtonsoft.Json;
 using RepositoryLayer.Entity;
 using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace FunDoNotesApplication.Controllers
 {
@@ -15,9 +19,11 @@ namespace FunDoNotesApplication.Controllers
         
 
         private readonly ILabelManager manager;
-        public LabelController(ILabelManager manager)
+        private readonly IDistributedCache distributedCache;
+        public LabelController(ILabelManager manager, IDistributedCache distributedCache)
         {
             this.manager = manager;
+            this.distributedCache = distributedCache;
         }
 
         [Authorize]
@@ -48,12 +54,30 @@ namespace FunDoNotesApplication.Controllers
         [Authorize]
         [HttpGet]
 
-        public ActionResult ViewAllLabels()
+        public async Task<IActionResult> ViewAllLabels()
         {
             try
             {
                 var UserId = Convert.ToInt64(User.FindFirst("UserId").Value);
-                var AllLabels = manager.GetLabels(UserId);
+                var cacheKey = "labelsList";
+                string serializedLabelsList;
+                var AllLabels = new List<LabelEntity>();
+                var redisNotesList = await distributedCache.GetAsync(cacheKey);
+                if (redisNotesList != null)
+                {
+                    serializedLabelsList = Encoding.UTF8.GetString(redisNotesList);
+                    AllLabels = JsonConvert.DeserializeObject<List<LabelEntity>>(serializedLabelsList);
+                }
+                else
+                {
+                    AllLabels = manager.GetLabels(UserId);
+                    serializedLabelsList = JsonConvert.SerializeObject(AllLabels);
+                    redisNotesList = Encoding.UTF8.GetBytes(serializedLabelsList);
+                    var options = new DistributedCacheEntryOptions()
+                        .SetAbsoluteExpiration(DateTime.Now.AddMinutes(10))
+                        .SetSlidingExpiration(TimeSpan.FromMinutes(2));
+                    await distributedCache.SetAsync(cacheKey, redisNotesList, options);
+                }
                 if (AllLabels != null)
                 {
                     return Ok(new ResponseModel<List<LabelEntity>> { Status=true, Message ="Labels Displayed Successfully",Data = AllLabels});
