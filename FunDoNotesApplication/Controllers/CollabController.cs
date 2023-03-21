@@ -2,10 +2,14 @@
 using ManagerLayer.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using RepositoryLayer.Entity;
 using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace FunDoNotesApplication.Controllers
 {
@@ -14,10 +18,12 @@ namespace FunDoNotesApplication.Controllers
     public class CollabController: ControllerBase
     {
         private readonly ICollabManager manager;
+        private readonly IDistributedCache distributedCache;
 
-        public CollabController(ICollabManager manager)
+        public CollabController(ICollabManager manager, IDistributedCache distributedCache)
         {
             this.manager = manager;
+            this.distributedCache = distributedCache;
         }
 
         [Authorize]
@@ -46,13 +52,31 @@ namespace FunDoNotesApplication.Controllers
 
         [Authorize]
         [HttpGet]
-        public ActionResult GetCollaborators()
+        public async Task<IActionResult> GetCollaborators()
         {
             try
             {
                 var UserId = Convert.ToInt64(User.FindFirst("UserId").Value);
-                var collab = manager.GetAllCollaborators(UserId);
-                if(collab!=null)
+                var cacheKey = "CollabList";
+                string serializedCollabList;
+                var collab = new List<CollaboratorEntity>();
+                var redisCollabList = await distributedCache.GetAsync(cacheKey);
+                if (redisCollabList != null)
+                {
+                    serializedCollabList = Encoding.UTF8.GetString(redisCollabList);
+                    collab = JsonConvert.DeserializeObject<List<CollaboratorEntity>>(serializedCollabList);
+                }
+                else
+                {
+                    collab = manager.GetAllCollaborators(UserId);
+                    serializedCollabList = JsonConvert.SerializeObject(collab);
+                    redisCollabList = Encoding.UTF8.GetBytes(serializedCollabList);
+                    var options = new DistributedCacheEntryOptions()
+                        .SetAbsoluteExpiration(DateTime.Now.AddMinutes(10))
+                        .SetSlidingExpiration(TimeSpan.FromMinutes(2));
+                    await distributedCache.SetAsync(cacheKey, redisCollabList, options);
+                }
+                if (collab!=null)
                 {
                     return Ok(new ResponseModel<List<CollaboratorEntity>> { Status = true, Message = "Collaborators retrieved successfully", Data = collab });
                 }
