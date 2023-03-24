@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Configuration;
 using System.Security.Claims;
+using NLog;
 
 namespace RepositoryLayer.Services
 {
@@ -17,6 +18,7 @@ namespace RepositoryLayer.Services
     {
         private readonly FundoAppContext context;
         private IConfiguration _config;
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         public UserRepository(FundoAppContext context, IConfiguration config)
         {
             this.context = context;
@@ -36,6 +38,7 @@ namespace RepositoryLayer.Services
                 context.SaveChanges();
                 if (check != null)
                 {
+                    logger.Info("New User Registered");
                     return entity;
                 }
                 else
@@ -74,6 +77,7 @@ namespace RepositoryLayer.Services
                 if (CheckDetails != null)
                 {
                     var token = GenerateToken(CheckDetails.Email, CheckDetails.UserId);
+                    logger.Info($"User {model.Email} logged in");
                     return token;
                 }
                 else
@@ -128,6 +132,7 @@ namespace RepositoryLayer.Services
                     var token = GenerateToken(checkEmail.Email, checkEmail.UserId);
                     MSMQ mSMQ= new MSMQ();
                     mSMQ.sendData2Queue(token);
+                    logger.Info($"Password reset initiated for {email}");
                     return token;
                 }
                 else
@@ -153,6 +158,7 @@ namespace RepositoryLayer.Services
                     {
                         checkEmail.Password = EncryptPassword(model.NewPassword);
                         context.SaveChanges();
+                        logger.Info($"Password reset for {email}");
                         return true;
                     }
                 }

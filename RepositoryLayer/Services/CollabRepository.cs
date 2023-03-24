@@ -1,4 +1,5 @@
 ﻿using CommonLayer.Models;
+using NLog;
 using RepositoryLayer.Entity;
 using RepositoryLayer.FundoContext;
 using RepositoryLayer.Interfaces;
@@ -12,6 +13,7 @@ namespace RepositoryLayer.Services
     public class CollabRepository: ICollabRepository
     {
         private readonly FundoAppContext context;
+        private static Logger logger = LogManager.GetCurrentClassLogger();
 
         public CollabRepository(FundoAppContext context)
         {
@@ -33,7 +35,7 @@ namespace RepositoryLayer.Services
                     context.SaveChanges();
                     if (check != null)
                     {
-
+                        logger.Info($"New Collaborator added to Note {collab.NotesId}");
                         return collaboratorEntity;
                     }
                     else
@@ -61,6 +63,7 @@ namespace RepositoryLayer.Services
                 var collabs = context.Collaborators.Where(x => x.UserId == UserId).ToList();
                 if (collabs.Count > 0)
                 {
+                    logger.Info($"Retrieved all collaborators for User {UserId}");
                     return collabs;
                 }
                 else
@@ -85,6 +88,7 @@ namespace RepositoryLayer.Services
                 {
                     context.Collaborators.Remove(checkCollab);
                     context.SaveChanges();
+                    logger.Info($"Deleted collaborator: {CollabId}");
                     return true;
                 }
                 else

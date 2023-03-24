@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Http;
 using System.IO;
 using CloudinaryDotNet.Actions;
 using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
+using NLog;
 
 namespace RepositoryLayer.Services
 {
@@ -22,8 +23,10 @@ namespace RepositoryLayer.Services
     {
         private readonly FundoAppContext context;
         private Cloudinary cloudinary;
+        private static Logger logger = LogManager.GetCurrentClassLogger();
 
-        
+
+
         public NotesRepository(FundoAppContext context, IConfiguration config)
         {
             this.context = context;
@@ -55,6 +58,7 @@ namespace RepositoryLayer.Services
                 context.SaveChanges();
                 if (check != null)
                 {
+                    logger.Info("New Note Added");
                     return notes;
                 }
                 else
@@ -83,6 +87,7 @@ namespace RepositoryLayer.Services
                     notes.Image = model.Image;
                     notes.Edited = DateTime.Now;
                     context.SaveChanges();
+                    logger.Info($"Note {NotesId} updated");
                     return notes;
                 }
                 else
@@ -107,10 +112,12 @@ namespace RepositoryLayer.Services
                     if(note.Pin == false)
                     {
                         note.Pin = true;
+                        logger.Info($"Note {NotesId} Pinned");
                     }
                     else
                     {
                         note.Pin = false;
+                        logger.Info($"Note {NotesId} Unpinned");
                     }
                     context.SaveChanges();
                     return note;
@@ -137,10 +144,12 @@ namespace RepositoryLayer.Services
                     if (note.Archive == false)
                     {
                         note.Archive = true;
+                        logger.Info($"Note {NotesId} Archived");
                     }
                     else
                     {
                         note.Archive = false;
+                        logger.Info($"Note {NotesId} Unarchived");
                     }
                     context.SaveChanges();
                     return note;
@@ -167,10 +176,12 @@ namespace RepositoryLayer.Services
                     if (note.Trash == false)
                     {
                         note.Trash = true;
+                        logger.Info($"Note {NotesId} sent to Trash");
                     }
                     else
                     {
                         note.Trash = false;
+                        logger.Info($"Note {NotesId} Restored");
                     }
                     context.SaveChanges();
                     return note;
@@ -197,6 +208,7 @@ namespace RepositoryLayer.Services
                     note.BackgroundColor = model.BackgroundColor;
                     note.Edited = DateTime.Now;
                     context.SaveChanges();
+                    logger.Info($"Note {NotesId} colour changed");
                     return note;
                 }
                 else
@@ -218,6 +230,7 @@ namespace RepositoryLayer.Services
                 var AllNotes = context.Notes.Where(x=>x.UserId==UserId).ToList();
                 if (AllNotes.Count> 0)
                 {
+                    logger.Info($"All notes retrieved");
                     return AllNotes;
                 }
                 else
@@ -240,6 +253,7 @@ namespace RepositoryLayer.Services
                 var checkNote = context.Notes.FirstOrDefault(o => o.NotesId == id && o.UserId==UserId);
                 if (checkNote != null)
                 {
+                    logger.Info($"Note {id} retrieved");
                     return checkNote;
                 }
                 else
@@ -265,6 +279,7 @@ namespace RepositoryLayer.Services
                 {
                     context.Notes.Remove(checkNote);
                     context.SaveChanges();
+                    logger.Info($"Note {NotesId} Deleted");
                     return true;
                 }
                 else
@@ -301,6 +316,7 @@ namespace RepositoryLayer.Services
                         note.Image = uploadResult.Url.ToString();
                         note.Edited = DateTime.Now;
                         context.SaveChanges();
+                        logger.Info($"Image uploaded to Note {NotesId}");
                         return note;
                     }
                     

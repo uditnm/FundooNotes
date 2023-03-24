@@ -1,4 +1,5 @@
 ﻿using CommonLayer.Models;
+using NLog;
 using RepositoryLayer.Entity;
 using RepositoryLayer.FundoContext;
 using RepositoryLayer.Interfaces;
@@ -11,6 +12,7 @@ namespace RepositoryLayer.Services
     public class LabelRepository : ILabelRepository
     {
         private readonly FundoAppContext context;
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         public LabelRepository(FundoAppContext context)
         {
             this.context = context;
@@ -31,6 +33,7 @@ namespace RepositoryLayer.Services
                     context.SaveChanges();
                     if (check != null)
                     {
+                        logger.Info("New Label Created");
                         return label;
                     }
                     else
@@ -58,6 +61,7 @@ namespace RepositoryLayer.Services
                 if (checkUser != null)
                 {
                     var labels = context.Labels.Where(x => x.UserId == UserId).ToList();
+                    logger.Info("All labels retrieved");
                     return labels;
                 }
                 else
@@ -80,6 +84,7 @@ namespace RepositoryLayer.Services
                 if (checkUser != null)
                 {
                     var labels = context.Labels.Where(x => x.NoteId == NoteId).ToList();
+                    logger.Info($"Labels for Note {NoteId} retrieved");
                     return labels;
                 }
                 else
@@ -103,6 +108,7 @@ namespace RepositoryLayer.Services
                 {
                     context.Labels.Remove(checkUser);
                     context.SaveChanges();
+                    logger.Info($"Label {LabelId} deleted");
                     return true;
                 }
                 else
@@ -126,6 +132,7 @@ namespace RepositoryLayer.Services
                 {
                     Label.LabelName = LabelName;
                     context.SaveChanges();
+                    logger.Info($"Label {LabelId} edited");
                     return Label;
                 }
                 else
