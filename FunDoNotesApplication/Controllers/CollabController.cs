@@ -1,5 +1,6 @@
 ﻿using CommonLayer.Models;
 using ManagerLayer.Interfaces;
+using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
@@ -19,16 +20,18 @@ namespace FunDoNotesApplication.Controllers
     {
         private readonly ICollabManager manager;
         private readonly IDistributedCache distributedCache;
+        private readonly IBus bus;
 
-        public CollabController(ICollabManager manager, IDistributedCache distributedCache)
+        public CollabController(ICollabManager manager, IDistributedCache distributedCache, IBus bus)
         {
             this.manager = manager;
             this.distributedCache = distributedCache;
+            this.bus = bus;
         }
 
         [Authorize]
         [HttpPost]
-        public ActionResult AddCollaborator(CollabModel model)
+        public async Task<IActionResult> AddCollaborator(CollabModel model)
         {
             try
             {
@@ -36,6 +39,9 @@ namespace FunDoNotesApplication.Controllers
                 var colab = manager.AddCollab(model, UserId);
                 if (colab != null)
                 {
+                    Uri uri = new Uri("rabbitmq://localhost/collabQueue");
+                    var endPoint = await bus.GetSendEndpoint(uri);
+                    await endPoint.Send(model);
                     return Ok(new ResponseModel<CollaboratorEntity> { Status=true, Message="Collaborator Added successfully", Data= colab });
                 }
                 else

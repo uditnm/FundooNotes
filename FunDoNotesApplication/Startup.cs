@@ -21,6 +21,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using MassTransit;
 
 namespace FunDoNotesApplication
 {
@@ -46,6 +47,19 @@ namespace FunDoNotesApplication
             services.AddTransient<ICollabRepository, CollabRepository>();
             services.AddTransient<ILabelManager, LabelManager>();
             services.AddTransient<ILabelRepository, LabelRepository>();
+
+            services.AddMassTransit(x =>
+            {
+                x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(config =>
+                {
+                    //config.UseHealthCheck(provider);
+                    config.Host(new Uri("rabbitmq://localhost"), h =>
+                    {
+                        h.Username("guest");
+                        h.Password("guest");
+                    });
+                }));
+            });
 
             services.AddSwaggerGen(c =>
             {
