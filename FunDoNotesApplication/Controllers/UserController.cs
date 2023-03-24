@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryLayer.Entity;
 using System;
+using System.Linq;
 using System.Security.Claims;
+
 
 namespace FunDoNotesApplication.Controllers
 {
@@ -25,6 +27,10 @@ namespace FunDoNotesApplication.Controllers
         {
             try
             {
+                if (model.GetType().GetProperties().Select(x=>x.GetValue(model)).Any(value=>value==null))
+                {
+                    throw new FundoException(FundoException.ExceptionType.INVALID_INPUT);
+                }
                 var checkReg = manager.UserRegister(model);
                 if (checkReg != null)
                 {
@@ -34,6 +40,11 @@ namespace FunDoNotesApplication.Controllers
                 {
                     return BadRequest(new ResponseModel<UserEntity> { Status = false, Message = "Register Unsuccessful", Data = checkReg });
                 }
+            }
+            catch(FundoException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception e)
             {
@@ -49,6 +60,10 @@ namespace FunDoNotesApplication.Controllers
         {
             try
             {
+                if (model.GetType().GetProperties().Select(x => x.GetValue(model)).Any(value => value == null))
+                {
+                    throw new FundoException(FundoException.ExceptionType.INVALID_INPUT);
+                }
                 var checkLogin = manager.Login(model);
                 if (checkLogin != null)
                 {
@@ -59,6 +74,11 @@ namespace FunDoNotesApplication.Controllers
                 {
                     return BadRequest(new ResponseModel<string> { Status = false, Message = "Login unsuccessful", Data = checkLogin });
                 }
+            }
+            catch (FundoException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception e)
             {
@@ -74,6 +94,10 @@ namespace FunDoNotesApplication.Controllers
         {
             try
             {
+                if (email == null)
+                {
+                    throw new FundoException(FundoException.ExceptionType.INVALID_INPUT);
+                }
                 var checkEmail = manager.ForgetPassword(email);
                 if (checkEmail != null)
                 {
@@ -83,6 +107,11 @@ namespace FunDoNotesApplication.Controllers
                 {
                     return BadRequest(new ResponseModel<string> { Status = false, Message = "Reset Unsuccessfull" });
                 }
+            }
+            catch (FundoException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception)
             {
@@ -97,6 +126,10 @@ namespace FunDoNotesApplication.Controllers
         {
             try
             {
+                if (model.GetType().GetProperties().Select(x => x.GetValue(model)).Any(value => value == null))
+                {
+                    throw new FundoException(FundoException.ExceptionType.INVALID_INPUT);
+                }
                 var email = User.FindFirst(ClaimTypes.Email).Value.ToString();
                 var user = manager.ResetPassword(model, email);
                 if (user)
@@ -108,9 +141,13 @@ namespace FunDoNotesApplication.Controllers
                     return BadRequest(new ResponseModel<UserEntity> { Status = false, Message = "Reset Unsuccessfull" });
                 }
             }
+            catch (FundoException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return BadRequest(ex.Message);
+            }
             catch (Exception)
             {
-
                 throw;
             }
         }
